@@ -21,13 +21,3 @@ export async function exportPng(editor: Editor, name: string): Promise<void> {
   download(blob, `${name}.png`)
 }
 
-export async function exportSvg(editor: Editor, name: string): Promise<void> {
-  const ids = [...editor.getCurrentPageShapeIds()]
-  if (!ids.length) return
-  const res = await editor.getSvgString(ids, { background: true })
-  if (!res) return
-  const svg: string = typeof res === 'string' ? res : (res as { svg: string }).svg
-  if (!svg) return
-  const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' })
-  download(blob, `${name}.svg`)
-}

@@ -12,8 +12,7 @@ import { StampShapeUtil } from './stamps/StampShape'
 import { useAutosave } from './canvas/useAutosave'
 import { useRightClickPan } from './canvas/useRightClickPan'
 import { useShapeRecognition } from './canvas/useShapeRecognition'
-import { exportPng, exportSvg } from './export/exportImage'
-import { exportPdf } from './export/exportPdf'
+import { exportPng } from './export/exportImage'
 
 const HIDDEN: TLComponents = {
   MainMenu: null,
@@ -260,14 +259,12 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [editor])
 
-  const doExport = async (kind: 'png' | 'svg' | 'pdf') => {
+  const doExport = async () => {
     if (!editor) return
     setPanel(null)
     const name = (activeBoardName || 'board').replace(/[^\w.\- ]/g, '_')
     try {
-      if (kind === 'png') await exportPng(editor, name)
-      else if (kind === 'svg') await exportSvg(editor, name)
-      else await exportPdf(editor, name)
+      await exportPng(editor, name)
     } catch (e) {
       console.warn('Export failed', e)
       window.alert('Export failed — see console for details.')
@@ -333,9 +330,7 @@ export default function App() {
                 </button>
               </div>
               <div className="boardsharp-export-list">
-                <button onClick={() => doExport('png')}>PNG image</button>
-                <button onClick={() => doExport('svg')}>SVG vector</button>
-                <button onClick={() => doExport('pdf')}>PDF (landscape Letter)</button>
+                <button onClick={() => doExport()}>PNG image</button>
               </div>
             </div>
           )}
