@@ -83,3 +83,53 @@ export function deleteBoard(id: string): void {
   saveIndex(index)
   localStorage.removeItem(BOARD_PREFIX + id)
 }
+
+// ----- File share (Save / Upload board) -----
+
+export type BoardFile = {
+  version: 1
+  name: string
+  exportedAt: number
+  snapshot: TLEditorSnapshot
+}
+
+export function serializeBoard(id: string, name: string): string | null {
+  const snap = loadBoard(id)
+  if (!snap) return null
+  const file: BoardFile = {
+    version: 1,
+    name,
+    exportedAt: Date.now(),
+    snapshot: snap,
+  }
+  return JSON.stringify(file)
+}
+
+function uniqueName(desired: string): string {
+  const existing = new Set(loadIndex().map(b => b.name))
+  if (!existing.has(desired)) return desired
+  let candidate = `${desired} (uploaded)`
+  let n = 2
+  while (existing.has(candidate)) {
+    candidate = `${desired} (uploaded ${n++})`
+  }
+  return candidate
+}
+
+export function importBoardFromJSON(text: string): BoardMeta | null {
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(text)
+  } catch {
+    return null
+  }
+  if (!parsed || typeof parsed !== 'object') return null
+  const obj = parsed as Record<string, unknown>
+  if (obj.version !== 1) return null
+  if (!obj.snapshot || typeof obj.snapshot !== 'object') return null
+  const rawName = typeof obj.name === 'string' ? obj.name.trim() : ''
+  const finalName = uniqueName(rawName || 'Imported board')
+  const meta = createBoard(finalName)
+  saveBoard(meta.id, obj.snapshot as TLEditorSnapshot)
+  return meta
+}
