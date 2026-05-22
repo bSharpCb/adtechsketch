@@ -60,10 +60,6 @@ function readBulletsText(el: HTMLElement | null): string[] {
     .filter(s => s.length > 0)
 }
 
-function clearbitUrl(domain: string): string {
-  return `https://logo.clearbit.com/${domain}`
-}
-
 function faviconUrl(domain: string): string {
   return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128`
 }
@@ -539,7 +535,7 @@ function StampView({ shape }: { shape: StampShape }) {
     () => editor.getEditingShapeId() === shape.id,
     [editor, shape.id],
   )
-  const [logoState, setLogoState] = useState<'clearbit' | 'favicon' | 'none'>('clearbit')
+  const [logoState, setLogoState] = useState<'favicon' | 'none'>('favicon')
   const [overrideFailed, setOverrideFailed] = useState(false)
   const partnerRef = useRef<HTMLDivElement>(null)
   const headerRef = useRef<HTMLDivElement>(null)
@@ -549,11 +545,9 @@ function StampView({ shape }: { shape: StampShape }) {
       ? overrideLogo
       : !domain
         ? null
-        : logoState === 'clearbit'
-          ? clearbitUrl(domain)
-          : logoState === 'favicon'
-            ? faviconUrl(domain)
-            : null
+        : logoState === 'favicon'
+          ? faviconUrl(domain)
+          : null
 
   useEffect(() => {
     if (!isEditable || !isEditing || !partnerRef.current) return
@@ -794,9 +788,7 @@ function StampView({ shape }: { shape: StampShape }) {
                   if (overrideLogo && !overrideFailed) {
                     setOverrideFailed(true)
                   } else {
-                    setLogoState(prev =>
-                      prev === 'clearbit' ? 'favicon' : 'none',
-                    )
+                    setLogoState('none')
                   }
                 }}
                 style={{
@@ -864,17 +856,15 @@ function FlagshipStampView({ shape }: { shape: StampShape }) {
 
   const { w, h, partner, domain, fillColor, textColor, geo, categoryId } = shape.props
   const meta = shape.meta as { kind?: string; features?: string[] }
-  const [logoState, setLogoState] = useState<'clearbit' | 'favicon' | 'none'>('clearbit')
+  const [logoState, setLogoState] = useState<'favicon' | 'none'>('favicon')
   const partnerRef = useRef<HTMLDivElement>(null)
   const bulletsRef = useRef<HTMLDivElement>(null)
 
   const logoUrl = !domain
     ? null
-    : logoState === 'clearbit'
-      ? clearbitUrl(domain)
-      : logoState === 'favicon'
-        ? faviconUrl(domain)
-        : null
+    : logoState === 'favicon'
+      ? faviconUrl(domain)
+      : null
 
   const features = meta.features ?? FLAGSHIP_FEATURES[categoryId] ?? []
 
@@ -1014,11 +1004,7 @@ function FlagshipStampView({ shape }: { shape: StampShape }) {
                   src={logoUrl}
                   alt=""
                   draggable={false}
-                  onError={() =>
-                    setLogoState(prev =>
-                      prev === 'clearbit' ? 'favicon' : 'none',
-                    )
-                  }
+                  onError={() => setLogoState('none')}
                   style={{
                     height: Math.max(0, logoH - h * 0.02),
                     maxWidth: '100%',
