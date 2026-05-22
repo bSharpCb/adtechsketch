@@ -5,6 +5,7 @@ import 'tldraw/tldraw.css'
 import {
   loadIndex, getActiveBoardId, setActiveBoardId,
   loadBoard, createBoard, saveBoard,
+  serializeBoard, importBoardFromJSON,
 } from './boards/storage'
 import { BoardManager } from './boards/BoardManager'
 import { StampMenu } from './stamps/StampMenu'
@@ -30,7 +31,7 @@ const HIDDEN: TLComponents = {
 
 const SHAPE_UTILS = [StampShapeUtil]
 
-type Panel = null | 'boards' | 'stamps' | 'export'
+type Panel = null | 'boards' | 'stamps' | 'export' | 'share'
 
 const TOOLBAR_TOOLS = [
   { id: 'select', label: 'Select' },
@@ -271,6 +272,51 @@ export default function App() {
     }
   }
 
+  const handleShareSave = () => {
+    if (!activeBoardId) return
+    const json = serializeBoard(activeBoardId, activeBoardName)
+    if (!json) {
+      window.alert('Could not save: board data not found.')
+      return
+    }
+    const safeName = (activeBoardName || 'board').replace(/[^\w.\- ]/g, '_')
+    const blob = new Blob([json], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${safeName}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    setPanel(null)
+  }
+
+  const handleShareUpload = () => {
+    setPanel(null)
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'application/json,.json'
+    input.onchange = async () => {
+      const file = input.files?.[0]
+      if (!file) return
+      let text: string
+      try {
+        text = await file.text()
+      } catch {
+        window.alert('Could not read the selected file.')
+        return
+      }
+      const meta = importBoardFromJSON(text)
+      if (!meta) {
+        window.alert('Could not import: file is not a valid BoardSharp board.')
+        return
+      }
+      switchTo(meta.id)
+    }
+    input.click()
+  }
+
   return (
     <div className="boardsharp-app">
       <div className="boardsharp-topbar">
@@ -297,6 +343,12 @@ export default function App() {
             onClick={() => setPanel(panel === 'export' ? null : 'export')}
           >
             Export
+          </button>
+          <button
+            className={panel === 'share' ? 'active' : ''}
+            onClick={() => setPanel(panel === 'share' ? null : 'share')}
+          >
+            Share
           </button>
         </div>
       </div>
@@ -331,6 +383,24 @@ export default function App() {
               </div>
               <div className="boardsharp-export-list">
                 <button onClick={() => doExport()}>PNG image</button>
+              </div>
+            </div>
+          )}
+          {panel === 'share' && (
+            <div className="boardsharp-panel">
+              <div className="boardsharp-panel__header">
+                <span>Share</span>
+                <button
+                  className="boardsharp-panel__close"
+                  onClick={() => setPanel(null)}
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="boardsharp-export-list">
+                <button onClick={handleShareSave}>Save board</button>
+                <button onClick={handleShareUpload}>Upload board</button>
               </div>
             </div>
           )}
