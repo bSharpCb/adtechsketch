@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Tldraw, useValue, type Editor, type TLComponents } from 'tldraw'
+import { DefaultSizeStyle, Tldraw, useValue, type Editor, type TLComponents } from 'tldraw'
 import 'tldraw/tldraw.css'
 
 import {
@@ -126,6 +126,51 @@ function Toolbar({ editor }: { editor: Editor | null }) {
           aria-pressed={currentToolId === tool.id}
         >
           <ToolIcon id={tool.id} />
+        </button>
+      ))}
+    </div>
+  )
+}
+
+const SIZES = ['s', 'm', 'l', 'xl'] as const
+const SIZE_TOOLS = new Set(['draw', 'arrow', 'text'])
+
+function SizeSelector({ editor }: { editor: Editor | null }) {
+  const currentToolId = useValue(
+    'size-current-tool',
+    () => editor?.getCurrentToolId() ?? '',
+    [editor],
+  )
+  const currentSize = useValue(
+    'size-current-style',
+    () => (editor ? editor.getStyleForNextShape(DefaultSizeStyle) : null),
+    [editor],
+  )
+  if (!editor) return null
+  if (!SIZE_TOOLS.has(currentToolId)) return null
+
+  const apply = (value: typeof SIZES[number]) => {
+    editor.run(() => {
+      editor.setStyleForNextShapes(DefaultSizeStyle, value)
+      if (editor.getSelectedShapeIds().length > 0) {
+        editor.setStyleForSelectedShapes(DefaultSizeStyle, value)
+      }
+    })
+  }
+
+  return (
+    <div className="boardsharp-toolbar" role="toolbar" aria-label="Size">
+      {SIZES.map(size => (
+        <button
+          key={size}
+          type="button"
+          className={`boardsharp-tool boardsharp-tool--size${currentSize === size ? ' active' : ''}`}
+          onClick={() => apply(size)}
+          title={`Size ${size.toUpperCase()}`}
+          aria-label={`Size ${size.toUpperCase()}`}
+          aria-pressed={currentSize === size}
+        >
+          {size.toUpperCase()}
         </button>
       ))}
     </div>
@@ -325,6 +370,7 @@ export default function App() {
           <span className="boardsharp-topbar__board">{activeBoardName}</span>
         </div>
         <Toolbar editor={editor} />
+        <SizeSelector editor={editor} />
         <div className="boardsharp-topbar__section boardsharp-topbar__section--right">
           <button
             className={panel === 'boards' ? 'active' : ''}
