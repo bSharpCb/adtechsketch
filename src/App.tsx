@@ -177,6 +177,51 @@ function SizeSelector({ editor }: { editor: Editor | null }) {
   )
 }
 
+function ColorSelector({ editor }: { editor: Editor | null }) {
+  const state = useValue(
+    'stamp-color-state',
+    () => {
+      if (!editor) return null
+      const stamps = editor.getSelectedShapes().filter(s => s.type === 'stamp')
+      if (stamps.length === 0) return null
+      const first = stamps[0].props as { fillColor: string; textColor: string }
+      return { ids: stamps.map(s => s.id), fill: first.fillColor, text: first.textColor }
+    },
+    [editor],
+  )
+
+  if (!editor || !state) return null
+
+  const apply = (key: 'fillColor' | 'textColor', value: string) => {
+    editor.updateShapes(
+      state.ids.map(id => ({ id, type: 'stamp', props: { [key]: value } } as never)),
+    )
+  }
+
+  return (
+    <div className="boardsharp-toolbar" role="toolbar" aria-label="Stamp colors">
+      <label className="boardsharp-color" title="Fill color">
+        Fill
+        <input
+          type="color"
+          className="boardsharp-color__input"
+          value={state.fill}
+          onChange={e => apply('fillColor', e.currentTarget.value)}
+        />
+      </label>
+      <label className="boardsharp-color" title="Text color">
+        Text
+        <input
+          type="color"
+          className="boardsharp-color__input"
+          value={state.text}
+          onChange={e => apply('textColor', e.currentTarget.value)}
+        />
+      </label>
+    </div>
+  )
+}
+
 export default function App() {
   const [editor, setEditor] = useState<Editor | null>(null)
   const [container, setContainer] = useState<HTMLDivElement | null>(null)
@@ -371,6 +416,7 @@ export default function App() {
         </div>
         <Toolbar editor={editor} />
         <SizeSelector editor={editor} />
+        <ColorSelector editor={editor} />
         <div className="boardsharp-topbar__section boardsharp-topbar__section--right">
           <button
             className={panel === 'boards' ? 'active' : ''}

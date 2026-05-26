@@ -10,6 +10,12 @@ type RenderItem =
   | { kind: 'category'; cat: StampCategory }
   | { kind: 'group'; group: StampGroup; cats: StampCategory[] }
 
+// The synthetic "Generic" stamp every category exposes: no logo, label reads
+// the category's `genericLabel` (e.g. "DSP" for DSPs), falling back to the name.
+function genericPartner(cat: StampCategory): Partner {
+  return { name: 'Generic', domain: '', displayName: cat.genericLabel ?? cat.name }
+}
+
 function buildTree(): RenderItem[] {
   const items: RenderItem[] = []
   const seenGroups = new Set<string>()
@@ -69,7 +75,7 @@ export function StampMenu({ editor, onClose }: { editor: Editor; onClose: () => 
 
   const drop = (cat: StampCategory, partner: Partner) => {
     const bounds = editor.getViewportPageBounds()
-    const isFlagship = cat.id === 'permutive'
+    const isFlagship = partner.flagship === true
     const isWarehouse = cat.id === 'warehouses'
     const isCdp = cat.id === 'cdps'
     const isDigitalProperty = cat.id === 'digital-properties'
@@ -110,7 +116,7 @@ export function StampMenu({ editor, onClose }: { editor: Editor; onClose: () => 
         h,
         partner: displayedPartner,
         domain: partner.domain,
-        fillColor: COLOR_HEX[cat.color] ?? '#4263eb',
+        fillColor: COLOR_HEX[partner.color ?? cat.color] ?? '#4263eb',
         textColor,
         geo,
         categoryId: cat.id,
@@ -129,7 +135,7 @@ export function StampMenu({ editor, onClose }: { editor: Editor; onClose: () => 
       </div>
       {openCats.has(cat.id) && (
         <div className="boardsharp-cat__list">
-          {cat.partners.map(p => (
+          {(cat.noGeneric ? cat.partners : [...cat.partners, genericPartner(cat)]).map(p => (
             <button
               key={p.name}
               className="boardsharp-cat__partner"
