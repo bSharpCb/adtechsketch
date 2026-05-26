@@ -96,6 +96,33 @@ html, body, #root {
   padding: 5px 6px;
 }
 
+.boardsharp-color {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.boardsharp-color__input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid #d1d5db;
+  border-radius: 5px;
+  background: none;
+  cursor: pointer;
+}
+
+.boardsharp-color__input::-webkit-color-swatch-wrapper { padding: 2px; }
+.boardsharp-color__input::-webkit-color-swatch { border: none; border-radius: 3px; }
+.boardsharp-color__input::-moz-color-swatch { border: none; border-radius: 3px; }
+
 .boardsharp-topbar button {
   background: transparent;
   border: 1px solid #d1d5db;

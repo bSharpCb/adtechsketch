@@ -844,7 +844,7 @@ function StampView({ shape }: { shape: StampShape }) {
   )
 }
 
-const STAMPS_EDITABLE_CATEGORIES = new Set(['permutive', 'digital-properties'])
+const STAMPS_EDITABLE_CATEGORIES = new Set(['permutive', 'digital-properties', 'general'])
 
 function FlagshipStampView({ shape }: { shape: StampShape }) {
   const editor = useEditor()

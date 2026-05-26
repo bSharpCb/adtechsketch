@@ -13,6 +13,11 @@ export type Partner = {
   // Use for cases where the current logo from the domain doesn't match what
   // we want — e.g. the classic Twitter bird vs. the current "X" mark.
   logoUrl?: string
+  // When true, the dropped stamp renders as the large flagship layout
+  // (feature bullets) instead of the standard stamp.
+  flagship?: boolean
+  // Optional: override the category's color (a COLOR_HEX key) for this partner.
+  color?: string
 }
 
 // Classic Twitter bird SVG, served as an inline data URL so it survives
@@ -30,6 +35,12 @@ export type StampCategory = {
   color: string
   partners: Partner[]
   groupId?: string
+  // Text shown on the auto-injected "Generic" stamp for this category
+  // (e.g. "DSP" for the DSPs category). Defaults to the category name.
+  genericLabel?: string
+  // When true, this category does not get an auto-injected "Generic" stamp
+  // (its partners are already generic ecosystem pieces).
+  noGeneric?: boolean
 }
 
 export type StampGroup = {
@@ -41,6 +52,7 @@ export type StampGroup = {
 }
 
 export const STAMP_GROUPS: StampGroup[] = [
+  { id: 'permutive', name: 'Permutive', defaultOpen: true, nestedDefaultOpen: true },
   { id: 'staples', name: 'Staples', defaultOpen: true, nestedDefaultOpen: true },
   { id: 'activation', name: 'Activation', defaultOpen: true },
   { id: 'data-sources', name: 'Data Sources', defaultOpen: true },
@@ -54,8 +66,13 @@ export const STAMP_CATEGORIES: StampCategory[] = [
     name: 'Permutive',
     geo: 'oval',
     color: 'permutive',
-    groupId: 'staples',
-    partners: [{ name: 'Permutive', domain: 'permutive.com' }],
+    groupId: 'permutive',
+    genericLabel: 'Permutive',
+    partners: [
+      { name: 'Permutive', domain: 'permutive.com', flagship: true },
+      { name: 'SDK', domain: '', displayName: 'SDK' },
+      { name: 'DMP', domain: '', displayName: 'DMP' },
+    ],
   },
   {
     id: 'digital-properties',
@@ -63,6 +80,7 @@ export const STAMP_CATEGORIES: StampCategory[] = [
     geo: 'rectangle',
     color: 'light-grey',
     groupId: 'staples',
+    genericLabel: 'Digital Property',
     partners: [
       {
         name: 'Web',
@@ -117,6 +135,7 @@ export const STAMP_CATEGORIES: StampCategory[] = [
     geo: 'cylinder',
     color: 'pale-green',
     groupId: 'data-sources',
+    genericLabel: 'Data Warehouse',
     partners: [
       { name: 'Snowflake', domain: 'snowflake.com' },
       { name: 'Databricks', domain: 'databricks.com' },
@@ -131,6 +150,7 @@ export const STAMP_CATEGORIES: StampCategory[] = [
     geo: 'cloud',
     color: 'light-blue',
     groupId: 'data-sources',
+    genericLabel: 'CDP',
     partners: [
       { name: 'mParticle', domain: 'mparticle.com' },
       { name: 'Braze', domain: 'braze.com' },
@@ -144,6 +164,7 @@ export const STAMP_CATEGORIES: StampCategory[] = [
     geo: 'oval',
     color: 'light-red',
     groupId: 'data-sources',
+    genericLabel: 'ESP',
     partners: [
       { name: 'Salesforce Marketing Cloud', domain: 'salesforce.com' },
       { name: 'Adestra', domain: 'adestra.com' },
@@ -156,6 +177,7 @@ export const STAMP_CATEGORIES: StampCategory[] = [
     geo: 'rhombus',
     color: 'light-green',
     groupId: 'data-sources',
+    genericLabel: 'Survey Tool',
     partners: [
       { name: 'Collective Audience', domain: 'collectiveaudience.co' },
       { name: 'Apester', domain: 'apester.com' },
@@ -170,6 +192,7 @@ export const STAMP_CATEGORIES: StampCategory[] = [
     geo: 'pentagon',
     color: 'light-violet',
     groupId: 'data-sources',
+    genericLabel: 'Contextual',
     partners: [
       { name: 'IBM Watson', domain: 'ibm.com' },
       { name: 'Silverbullet 4D', domain: 'silverbullet.tv' },
@@ -183,6 +206,7 @@ export const STAMP_CATEGORIES: StampCategory[] = [
     geo: 'oval',
     color: 'red',
     groupId: 'activation',
+    genericLabel: 'DSP',
     partners: [
       { name: 'DV360', domain: 'doubleclickbygoogle.com' },
       { name: 'The Trade Desk', domain: 'thetradedesk.com' },
@@ -196,6 +220,7 @@ export const STAMP_CATEGORIES: StampCategory[] = [
     geo: 'octagon',
     color: 'orange',
     groupId: 'activation',
+    genericLabel: 'SSP',
     partners: [
       { name: 'Microsoft Monetize (SSP)', domain: 'microsoft.com' },
       { name: 'OpenX', domain: 'openx.com' },
@@ -210,6 +235,7 @@ export const STAMP_CATEGORIES: StampCategory[] = [
     geo: 'rectangle',
     color: 'blue',
     groupId: 'activation',
+    genericLabel: 'Ad Server',
     partners: [
       { name: 'GAM', domain: 'admanager.google.com' },
       { name: 'Microsoft Monetize (Ad Server)', domain: 'microsoft.com' },
@@ -225,6 +251,7 @@ export const STAMP_CATEGORIES: StampCategory[] = [
     geo: 'oval',
     color: 'green',
     groupId: 'activation',
+    genericLabel: 'Video Player',
     partners: [
       { name: 'YouTube', domain: 'youtube.com' },
       { name: 'Brightcove', domain: 'brightcove.com' },
@@ -238,6 +265,7 @@ export const STAMP_CATEGORIES: StampCategory[] = [
     geo: 'rectangle',
     color: 'social-teal',
     groupId: 'activation',
+    genericLabel: 'Social Media',
     partners: [
       { name: 'Facebook', domain: 'facebook.com' },
       { name: 'Instagram', domain: 'instagram.com' },
@@ -254,6 +282,7 @@ export const STAMP_CATEGORIES: StampCategory[] = [
     geo: 'table',
     color: 'excel-green',
     groupId: 'identity-solutions',
+    genericLabel: 'Identity Graph',
     partners: [
       { name: 'TransUnion', domain: 'transunion.com' },
       { name: 'Experian', domain: 'experian.com' },
@@ -266,6 +295,7 @@ export const STAMP_CATEGORIES: StampCategory[] = [
     geo: 'rectangle',
     color: 'yellow',
     groupId: 'identity-solutions',
+    genericLabel: 'Identity Provider',
     partners: [
       { name: 'UID2', domain: 'unifiedid.com' },
       { name: 'ID5', domain: 'id5.io' },
@@ -278,9 +308,28 @@ export const STAMP_CATEGORIES: StampCategory[] = [
     geo: 'hexagon',
     color: 'violet',
     groupId: 'etc',
+    genericLabel: 'Bidstream',
     partners: [
       { name: 'Prebid', domain: 'prebid.org' },
       { name: 'APS', domain: 'amazon.com' },
+    ],
+  },
+  {
+    id: 'general',
+    name: 'General',
+    geo: 'rectangle',
+    color: 'grey',
+    groupId: 'etc',
+    noGeneric: true,
+    partners: [
+      { name: 'Advertiser', domain: '', color: 'red' },
+      { name: 'Publisher', domain: '', color: 'orange' },
+      {
+        name: '3P Data Source',
+        domain: '',
+        displayName: 'e.g. Auto Intenders',
+        headerText: '3P data source',
+      },
     ],
   },
 ]
